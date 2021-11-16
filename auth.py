@@ -4,7 +4,7 @@
 
 import web
 import urllib
-import urlparse
+import urllib.parse
 import json
 
 
@@ -97,10 +97,10 @@ class handler:
       {a: '1', b: '2'} => a=1&b=2
     """
     if args == None:
-      response = urllib.urlopen(url)
+      response = urllib.request.urlopen(url)
     else:
-      query_string = urllib.urlencode(args)
-      response = urllib.urlopen('%s?%s' % (url, query_string))
+      query_string = urllib.parse.urlencode(args)
+      response = urllib.request.urlopen('%s?%s' % (url, query_string))
     return response
 
   def _http_post(self, url, args):
@@ -109,8 +109,8 @@ class handler:
     args (optional): dict used to build POST data, e.g.,
       {a: '1', b: '2'} => a=1&b=2
     """
-    data = urllib.urlencode(args)
-    response = urllib.urlopen(url, data)
+    data = urllib.parse.urlencode(args).encode("utf-8")
+    response = urllib.request.urlopen(url, data)
     return response
 
   def _check_provider(self, provider):
@@ -146,7 +146,7 @@ class handler:
       'scope': parameters[provider]['scope']
     }
 
-    auth_url = self.PROVIDERS[provider][1] + '?' + urllib.urlencode(args)
+    auth_url = self.PROVIDERS[provider][1] + '?' + urllib.parse.urlencode(args)
 
     # redirect users to login page of the provider
     raise web.seeother(auth_url)
@@ -177,7 +177,7 @@ class handler:
 
     _parser = getattr(self, '%s' % self.PROVIDERS[provider][3])
     response = _parser(
-        self._http_post(self.PROVIDERS[provider][2], args).read() )
+        self._http_post(self.PROVIDERS[provider][2], args).read())
     if response.get('error'):
       raise Exception(response)
 
@@ -224,7 +224,7 @@ class handler:
   def _query_string_parser(self, string):
     """Parse query-string-format string, and return Python dict object
     """
-    return dict(urlparse.parse_qsl(string))
+    return dict(urllib.parse.parse_qsl(string))
 
   def _json_parser(self, string):
     """Parse JSON format string, and return Python dict object
